@@ -2,9 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/dolegi/uci"
 	"log"
-	"time"
 )
 
 type event struct {
@@ -47,12 +45,12 @@ func handleEvent(e *event) {
 	switch e.Type {
 	case "challenge":
 		if validChallenge(&e.Challenge) {
-			acceptChallenge(&e.Challenge)
+			acceptChallenge(e.Challenge.Id)
 		} else {
 			log.Println("Invalid challenge", e.Challenge)
 		}
 	case "gameStart":
-		go startGame(e.Game.Id)
+		go streamGame(e.Game.Id)
 	default:
 		log.Printf("Unhandled Event %v\n", e)
 	}
@@ -60,30 +58,21 @@ func handleEvent(e *event) {
 
 func validChallenge(c *challenge) bool {
 	return c.Status == "created" &&
-		c.Variant.Key == "standard"
-	// e.Challenge.Rated == true &&
-	// e.Challenge.Speed == "blitz"
+		includes(conf.Challenge.Variants, c.Variant.Key) &&
+		includes(conf.Challenge.Speeds, c.Speed) &&
+		(c.Rated == true && includes(conf.Challenge.Modes, "rated") ||
+			c.Rated == false && includes(conf.Challenge.Modes, "casual"))
 }
 
-func acceptChallenge(c *challenge) {
-	request("POST", "challenge/"+c.Id+"/accept")
+func includes(arr []string, x string) bool {
+	for _, a := range arr {
+		if a == x {
+			return true
+		}
+	}
+	return false
 }
 
-func startGame(gameId string) {
-	retries := 0
-	for _ = range time.Tick(50 * time.Millisecond) {
-		if eng.IsReady() {
-			break
-		}
-		if retries > 10 {
-			break
-		}
-		retries++
-	}
-	if retries > 10 {
-		log.Println("startGame failed to find ready engine. Max retries exceeded")
-		return
-	}
-
-	streamGame(gameId)
+func acceptChallenge(challengeId string) {
+	request("POST", "challenge/"+challengeId+"/accept")
 }

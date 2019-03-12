@@ -2,9 +2,11 @@ package main
 
 import (
 	"github.com/BurntSushi/toml"
+	"github.com/dolegi/uci"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -12,10 +14,10 @@ type Config struct {
 	Botname string // done
 	Url     string // done
 	Engine  struct {
-		Path    string
+		Path    string // done
 		Options struct {
-			Threads int
-			Hash    int
+			Threads int // done
+			Hash    int // done
 		}
 		Go struct {
 			Nodes    int
@@ -37,7 +39,7 @@ type Config struct {
 }
 
 var conf Config
-var eng *Engine
+var eng *uci.Engine
 
 func main() {
 	configFile, err := os.Open("config.toml")
@@ -55,6 +57,22 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to create new engine", err)
 	}
+
+	retries := 0
+	for _ = range time.Tick(50 * time.Millisecond) {
+		if eng.IsReady() {
+			break
+		}
+		if retries > 10 {
+			break
+		}
+		retries++
+	}
+	if retries > 10 {
+		log.Fatal("Failed to find ready engine. Max retries exceeded", retries)
+	}
+	eng.SetOption("Threads", conf.Engine.Options.Threads)
+	eng.SetOption("Hash", conf.Engine.Options.Hash)
 
 	streamEvent()
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/dolegi/uci"
 	"log"
-	"time"
 )
 
 type gameState struct {
@@ -55,6 +54,12 @@ func streamGame(gameId string) {
 
 		if gS.Type == "gameState" {
 			eng.Position(gS.Moves)
+
+			if gS.White.Id == conf.Botname {
+				gS.Wtime -= conf.Network.Latency
+			} else {
+				gS.Btime -= conf.Network.Latency
+			}
 
 			goResp := eng.Go(uci.GoOpts{
 				Wtime: gS.Wtime,
