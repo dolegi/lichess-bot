@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/dolegi/uci"
 	"log"
-	"net/http"
+	"time"
 )
 
 type gameState struct {
@@ -41,13 +41,8 @@ type gameState struct {
 	Binc  int
 }
 
-func streamGame(gameId string, eng *uci.Engine) {
-	req, err := http.NewRequest("GET", lichessUrl+"bot/game/stream/"+gameId, nil)
-	req.Header.Add("Authorization", "Bearer "+apiKey)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
+func streamGame(gameId string) {
+	resp := request("GET", "bot/game/stream/"+gameId)
 	dec := json.NewDecoder(resp.Body)
 
 	for dec.More() {
@@ -71,7 +66,7 @@ func streamGame(gameId string, eng *uci.Engine) {
 			makeMove(gameId, goResp.Bestmove)
 		}
 
-		if gS.Type == "gameFull" && gS.White.Id == botName {
+		if gS.Type == "gameFull" && gS.White.Id == conf.Botname {
 			goResp := eng.Go(uci.GoOpts{MoveTime: 100})
 
 			makeMove(gameId, goResp.Bestmove)
@@ -80,13 +75,6 @@ func streamGame(gameId string, eng *uci.Engine) {
 }
 
 func makeMove(gameId, move string) {
-	url := lichessUrl + "bot/game/" + gameId + "/move/" + move
-	log.Println(url)
-	req, err := http.NewRequest("POST", lichessUrl+"bot/game/"+gameId+"/move/"+move, nil)
-	req.Header.Add("Authorization", "Bearer "+apiKey)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
+	resp := request("POST", "bot/game/"+gameId+"/move/"+move)
 	log.Println(resp)
 }

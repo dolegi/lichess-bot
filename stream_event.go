@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/dolegi/uci"
 	"log"
-	"net/http"
+	"time"
 )
 
 type event struct {
@@ -27,14 +28,8 @@ type challenge struct {
 	Color string `json:"color"`
 }
 
-func streamEvent(ch chan event) {
-	req, err := http.NewRequest("GET", lichessUrl+"stream/event", nil)
-	req.Header.Add("Authorization", "Bearer "+apiKey)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Println(err)
-	}
-
+func streamEvent() {
+	resp := request("GET", "stream/event")
 	dec := json.NewDecoder(resp.Body)
 
 	for dec.More() {
@@ -42,8 +37,53 @@ func streamEvent(ch chan event) {
 		err := dec.Decode(&e)
 		if err != nil {
 			log.Println(err)
+		} else {
+			handleEvent(&e)
 		}
-
-		ch <- e
 	}
+}
+
+func handleEvent(e *event) {
+	switch e.Type {
+	case "challenge":
+		if validChallenge(&e.Challenge) {
+			acceptChallenge(&e.Challenge)
+		} else {
+			log.Println("Invalid challenge", e.Challenge)
+		}
+	case "gameStart":
+		go startGame(e.Game.Id)
+	default:
+		log.Printf("Unhandled Event %v\n", e)
+	}
+}
+
+func validChallenge(c *challenge) bool {
+	return c.Status == "created" &&
+		c.Variant.Key == "standard"
+	// e.Challenge.Rated == true &&
+	// e.Challenge.Speed == "blitz"
+}
+
+func acceptChallenge(c *challenge) {
+	request("POST", "challenge/"+c.Id+"/accept")
+}
+
+func startGame(gameId string) {
+	retries := 0
+	for _ = range time.Tick(50 * time.Millisecond) {
+		if eng.IsReady() {
+			break
+		}
+		if retries > 10 {
+			break
+		}
+		retries++
+	}
+	if retries > 10 {
+		log.Println("startGame failed to find ready engine. Max retries exceeded")
+		return
+	}
+
+	streamGame(gameId)
 }
