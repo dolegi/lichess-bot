@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/dolegi/uci"
+	"io/ioutil"
 	"log"
 )
 
@@ -26,7 +28,7 @@ type challenge struct {
 	Color string `json:"color"`
 }
 
-func streamEvent() {
+func streamEvent(eng *uci.Engine) {
 	resp := request("GET", "stream/event")
 	dec := json.NewDecoder(resp.Body)
 
@@ -36,21 +38,22 @@ func streamEvent() {
 		if err != nil {
 			log.Println(err)
 		} else {
-			handleEvent(&e)
+			handleEvent(&e, eng)
 		}
 	}
 }
 
-func handleEvent(e *event) {
+func handleEvent(e *event, eng *uci.Engine) {
 	switch e.Type {
 	case "challenge":
-		if validChallenge(&e.Challenge) {
+		if validChallenge(&e.Challenge) && !gameInProgress() {
 			acceptChallenge(e.Challenge.Id)
 		} else {
-			log.Println("Invalid challenge", e.Challenge)
+			log.Println("Declining challenge", e.Challenge)
+			declineChallenge(e.Challenge.Id)
 		}
 	case "gameStart":
-		go streamGame(e.Game.Id)
+		streamGame(e.Game.Id, eng)
 	default:
 		log.Printf("Unhandled Event %v\n", e)
 	}
@@ -73,6 +76,31 @@ func includes(arr []string, x string) bool {
 	return false
 }
 
+func gameInProgress() bool {
+	type playing struct {
+		NowPlaying []struct {
+			gameId string
+		}
+	}
+	p := playing{}
+	resp := request("GET", "account/playing")
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Println("gameInProgress failed to read response body")
+		return false
+	}
+
+	json.Unmarshal(body, &p)
+
+	return len(p.NowPlaying) >= 1
+}
+
 func acceptChallenge(challengeId string) {
 	request("POST", "challenge/"+challengeId+"/accept")
+}
+
+func declineChallenge(challengeId string) {
+	request("POST", "challenge/"+challengeId+"/decline")
 }

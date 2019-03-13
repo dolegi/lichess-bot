@@ -20,18 +20,18 @@ type Config struct {
 			Hash    int // done
 		}
 		Go struct {
-			Nodes    int
-			Depth    int
-			Movetime int
+			Nodes    int // done
+			Depth    int // done
+			Movetime int // done
 		}
 	}
 	Network struct {
-		Latency int
+		Latency int // done
 	}
 	Challenge struct {
-		Variants []string
-		Speeds   []string
-		Modes    []string
+		Variants []string // done
+		Speeds   []string // done
+		Modes    []string // done
 	}
 	Game struct {
 		Aborttime int
@@ -39,10 +39,13 @@ type Config struct {
 }
 
 var conf Config
-var eng *uci.Engine
+var white bool = true
 
 func main() {
-	configFile, err := os.Open("config.toml")
+	if len(os.Args) < 2 {
+		log.Fatal("Missing path to config file. Usage `lichess-bot path/to/config`")
+	}
+	configFile, err := os.Open(os.Args[1])
 	if err != nil {
 		log.Fatal("Failed to open config.toml", err)
 	}
@@ -55,7 +58,7 @@ func main() {
 
 	eng, err := uci.NewEngine(conf.Engine.Path)
 	if err != nil {
-		log.Fatal("Failed to create new engine", err)
+		log.Fatal("Failed to create a new engine", err)
 	}
 
 	retries := 0
@@ -71,8 +74,12 @@ func main() {
 	if retries > 10 {
 		log.Fatal("Failed to find ready engine. Max retries exceeded", retries)
 	}
-	eng.SetOption("Threads", conf.Engine.Options.Threads)
-	eng.SetOption("Hash", conf.Engine.Options.Hash)
+	if conf.Engine.Options.Threads > 0 {
+		eng.SetOption("Threads", conf.Engine.Options.Threads)
+	}
+	if conf.Engine.Options.Hash > 0 {
+		eng.SetOption("Hash", conf.Engine.Options.Hash)
+	}
 
-	streamEvent()
+	streamEvent(eng)
 }

@@ -40,7 +40,8 @@ type gameState struct {
 	Binc  int
 }
 
-func streamGame(gameId string) {
+func streamGame(gameId string, eng *uci.Engine) {
+	eng.NewGame(uci.NewGameOpts{Type: uci.ALG})
 	resp := request("GET", "bot/game/stream/"+gameId)
 	dec := json.NewDecoder(resp.Body)
 
@@ -55,26 +56,57 @@ func streamGame(gameId string) {
 		if gS.Type == "gameState" {
 			eng.Position(gS.Moves)
 
-			if gS.White.Id == conf.Botname {
+			if white {
 				gS.Wtime -= conf.Network.Latency
 			} else {
 				gS.Btime -= conf.Network.Latency
 			}
 
-			goResp := eng.Go(uci.GoOpts{
+			opts := uci.GoOpts{
 				Wtime: gS.Wtime,
 				Btime: gS.Btime,
 				Winc:  gS.Winc,
 				Binc:  gS.Binc,
-			})
+			}
+			if conf.Engine.Go.Nodes > 0 {
+				opts.Nodes = conf.Engine.Go.Nodes
+			}
+			if conf.Engine.Go.Depth > 0 {
+				opts.Depth = conf.Engine.Go.Depth
+			}
+			if conf.Engine.Go.Movetime > 0 {
+				opts.MoveTime = conf.Engine.Go.Movetime
+			}
+
+			goResp := eng.Go(opts)
 
 			makeMove(gameId, goResp.Bestmove)
 		}
 
 		if gS.Type == "gameFull" && gS.White.Id == conf.Botname {
-			goResp := eng.Go(uci.GoOpts{MoveTime: 100})
+			white = true
+
+			opts := uci.GoOpts{
+				Wtime: gS.State.Wtime,
+				Btime: gS.State.Btime,
+				Winc:  gS.State.Winc,
+				Binc:  gS.State.Binc,
+			}
+			if conf.Engine.Go.Nodes > 0 {
+				opts.Nodes = conf.Engine.Go.Nodes
+			}
+			if conf.Engine.Go.Depth > 0 {
+				opts.Depth = conf.Engine.Go.Depth
+			}
+			if conf.Engine.Go.Movetime > 0 {
+				opts.MoveTime = conf.Engine.Go.Movetime
+			}
+
+			goResp := eng.Go(opts)
 
 			makeMove(gameId, goResp.Bestmove)
+		} else {
+			white = false
 		}
 	}
 }
