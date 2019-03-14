@@ -77,13 +77,11 @@ func includes(arr []string, x string) bool {
 }
 
 func gameInProgress() bool {
-	type playing struct {
-		NowPlaying []struct {
-			gameId string
-		}
+	type status struct {
+		Playing bool
 	}
-	p := playing{}
-	resp := request("GET", "account/playing")
+	s := []status{}
+	resp := request("GET", "users/status?ids="+conf.Botname)
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -92,9 +90,9 @@ func gameInProgress() bool {
 		return false
 	}
 
-	json.Unmarshal(body, &p)
+	json.Unmarshal(body, &s)
 
-	return len(p.NowPlaying) >= 1
+	return s[0].Playing
 }
 
 func acceptChallenge(challengeId string) {

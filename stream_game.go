@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/dolegi/uci"
 	"log"
+	"strings"
 )
 
 type gameState struct {
@@ -40,6 +41,8 @@ type gameState struct {
 	Binc  int
 }
 
+var lastMove string
+
 func streamGame(gameId string, eng *uci.Engine) {
 	eng.NewGame(uci.NewGameOpts{Type: uci.ALG})
 	resp := request("GET", "bot/game/stream/"+gameId)
@@ -54,6 +57,10 @@ func streamGame(gameId string, eng *uci.Engine) {
 		log.Printf("%v\n", gS)
 
 		if gS.Type == "gameState" {
+			moves := strings.Split(gS.Moves, " ")
+			if moves[len(moves)-1] == lastMove {
+				continue
+			}
 			eng.Position(gS.Moves)
 
 			if white {
@@ -81,6 +88,7 @@ func streamGame(gameId string, eng *uci.Engine) {
 			goResp := eng.Go(opts)
 
 			makeMove(gameId, goResp.Bestmove)
+			lastMove = goResp.Bestmove
 		}
 
 		if gS.Type == "gameFull" && gS.White.Id == conf.Botname {
