@@ -66,6 +66,7 @@ modes = [ # Modes to play. Must be "rated" and/or "casual"
 
 # Releases 
 See [releases](https://github.com/dolegi/lichess-bot/releases) for compiled releases
+Note: Windows release is untested
 
 # References
 - [Lichess docs](https://lichess.org/api#tag/Chess-Bot)
