@@ -10,7 +10,7 @@ Lichess bot interface for uci compatible engines.
 - Run with `./lichess-bot config.toml`
 
 ### Upgrade to bot account
-As well are normal usage shown about, you can use this library to upgrade your account
+As well as normal usage shown above, you can use this library to upgrade your account
 > WARNING: Upgrading your account cannot be undone
 To upgrade run like this
 ```
