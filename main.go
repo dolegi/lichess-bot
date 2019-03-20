@@ -5,6 +5,7 @@ import (
 	"github.com/dolegi/uci"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"time"
 )
@@ -55,6 +56,20 @@ func main() {
 		log.Fatal("Failed to decode config.toml", err)
 	}
 	log.Println(conf)
+
+	if len(os.Args) >= 3 && os.Args[2] == "upgrade" {
+		resp := request("POST", "bot/account/upgrade")
+
+		if resp.StatusCode == http.StatusOK {
+			log.Println("Account upgraded to bot account")
+		} else {
+			body, _ := ioutil.ReadAll(resp.Body)
+			log.Println("Failed to upgrade account")
+			log.Println(string(body))
+		}
+
+		return
+	}
 
 	eng, err := uci.NewEngine(conf.Engine.Path)
 	if err != nil {

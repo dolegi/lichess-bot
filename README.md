@@ -9,6 +9,14 @@ Lichess bot interface for uci compatible engines.
 - Put bot name, api key and engine path in `config.toml`
 - Run with `./lichess-bot config.toml`
 
+### Update to bot account
+As well are normal usage shown about, you can use this library to upgrade your account
+> WARNING: Upgrading your account cannot be undone
+To upgrade run like this
+```
+./lichess-bot config.toml upgrade
+```
+
 ## Minimal config
 ```toml
 token = "XXX"
