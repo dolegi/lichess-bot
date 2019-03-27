@@ -44,7 +44,6 @@ type gameState struct {
 var lastMove string
 
 func streamGame(gameId string, eng *uci.Engine) {
-	eng.NewGame(uci.NewGameOpts{Type: uci.ALG})
 	resp := request("GET", "bot/game/stream/"+gameId)
 	dec := json.NewDecoder(resp.Body)
 
@@ -58,6 +57,9 @@ func streamGame(gameId string, eng *uci.Engine) {
 
 		if gS.Type == "gameState" {
 			moves := strings.Split(gS.Moves, " ")
+			log.Println("Latest move: ", moves[len(moves)-1])
+			log.Println("Last move: ", lastMove)
+			log.Println("Moves: ", gS.Moves)
 			if moves[len(moves)-1] == lastMove {
 				continue
 			}
@@ -91,35 +93,42 @@ func streamGame(gameId string, eng *uci.Engine) {
 			lastMove = goResp.Bestmove
 		}
 
-		if gS.Type == "gameFull" && gS.White.Id == conf.Botname {
-			white = true
+		if gS.Type == "gameFull" {
+			log.Println("Starting position: ", gS.InitialFen)
+			eng.NewGame(uci.NewGameOpts{StartPos: gS.InitialFen})
 
-			opts := uci.GoOpts{
-				Wtime: gS.State.Wtime,
-				Btime: gS.State.Btime,
-				Winc:  gS.State.Winc,
-				Binc:  gS.State.Binc,
-			}
-			if conf.Engine.Go.Nodes > 0 {
-				opts.Nodes = conf.Engine.Go.Nodes
-			}
-			if conf.Engine.Go.Depth > 0 {
-				opts.Depth = conf.Engine.Go.Depth
-			}
-			if conf.Engine.Go.Movetime > 0 {
-				opts.MoveTime = conf.Engine.Go.Movetime
-			}
+			if gS.White.Id != conf.Botname {
+				white = false
+			} else {
+				white = true
 
-			goResp := eng.Go(opts)
+				opts := uci.GoOpts{
+					Wtime: gS.State.Wtime,
+					Btime: gS.State.Btime,
+					Winc:  gS.State.Winc,
+					Binc:  gS.State.Binc,
+				}
+				if conf.Engine.Go.Nodes > 0 {
+					opts.Nodes = conf.Engine.Go.Nodes
+				}
+				if conf.Engine.Go.Depth > 0 {
+					opts.Depth = conf.Engine.Go.Depth
+				}
+				if conf.Engine.Go.Movetime > 0 {
+					opts.MoveTime = conf.Engine.Go.Movetime
+				}
 
-			makeMove(gameId, goResp.Bestmove)
-		} else {
-			white = false
+				goResp := eng.Go(opts)
+
+				log.Println("Best move: ", goResp.Bestmove)
+				makeMove(gameId, goResp.Bestmove)
+			}
 		}
 	}
 }
 
 func makeMove(gameId, move string) {
+	log.Println("REQUEST", "bot/game/"+gameId+"/move/"+move)
 	resp := request("POST", "bot/game/"+gameId+"/move/"+move)
 	log.Println(resp)
 }
