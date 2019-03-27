@@ -60,9 +60,6 @@ func streamGame(gameId string, eng *uci.Engine) {
 			log.Println("Latest move: ", moves[len(moves)-1])
 			log.Println("Last move: ", lastMove)
 			log.Println("Moves: ", gS.Moves)
-			if moves[len(moves)-1] == lastMove {
-				continue
-			}
 			eng.Position(gS.Moves)
 
 			if white {
@@ -95,7 +92,7 @@ func streamGame(gameId string, eng *uci.Engine) {
 
 		if gS.Type == "gameFull" {
 			log.Println("Starting position: ", gS.InitialFen)
-			eng.NewGame(uci.NewGameOpts{StartPos: gS.InitialFen})
+			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, State: gS.State})
 
 			if gS.White.Id != conf.Botname {
 				white = false
