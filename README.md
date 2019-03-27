@@ -3,7 +3,7 @@ Lichess bot interface for uci compatible engines.
 
 ## How to use
 - Upgrade to a bot account on lichess. [guide](https://lichess.org/api#operation/botAccountUpgrade)
-- Download the binary for your system from the [releases](https://github.com/dolegi/lichess-bot/releases) or compile yourself
+- `go get github.com/dolegi/lichess-bot` 
 - Download a uci compatible engine such as [stockfish](https://stockfishchess.org/download/)
 - Create a new toml file for config
 - Put bot name, api key and engine path in `config.toml`
@@ -75,7 +75,7 @@ modes = [ # Modes to play. Must be "rated" and/or "casual"
 ```
 
 # Releases 
-See [releases](https://github.com/dolegi/lichess-bot/releases) for compiled releases
+To install run `go get github/dolegi/lichess-bot`
 Note: Windows release is untested
 
 # References
