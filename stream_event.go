@@ -47,6 +47,7 @@ func handleEvent(e *event, eng *uci.Engine) {
 	switch e.Type {
 	case "challenge":
 		if validChallenge(&e.Challenge) && !gameInProgress() {
+			log.Println("Accepting challenge", e.Challenge)
 			acceptChallenge(e.Challenge.Id)
 		} else {
 			log.Println("Declining challenge", e.Challenge)

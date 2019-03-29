@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/dolegi/uci"
 	"log"
-	"strings"
 )
 
 type gameState struct {
@@ -41,8 +40,6 @@ type gameState struct {
 	Binc  int
 }
 
-var lastMove string
-
 func streamGame(gameId string, eng *uci.Engine) {
 	resp := request("GET", "bot/game/stream/"+gameId)
 	dec := json.NewDecoder(resp.Body)
@@ -56,10 +53,6 @@ func streamGame(gameId string, eng *uci.Engine) {
 		log.Printf("%v\n", gS)
 
 		if gS.Type == "gameState" {
-			moves := strings.Split(gS.Moves, " ")
-			log.Println("Latest move: ", moves[len(moves)-1])
-			log.Println("Last move: ", lastMove)
-			log.Println("Moves: ", gS.Moves)
 			eng.Position(gS.Moves)
 
 			if white {
@@ -87,11 +80,9 @@ func streamGame(gameId string, eng *uci.Engine) {
 			goResp := eng.Go(opts)
 
 			makeMove(gameId, goResp.Bestmove)
-			lastMove = goResp.Bestmove
 		}
 
 		if gS.Type == "gameFull" {
-			log.Println("Starting position: ", gS.InitialFen)
 			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, State: gS.State})
 
 			if gS.White.Id != conf.Botname {
@@ -117,7 +108,6 @@ func streamGame(gameId string, eng *uci.Engine) {
 
 				goResp := eng.Go(opts)
 
-				log.Println("Best move: ", goResp.Bestmove)
 				makeMove(gameId, goResp.Bestmove)
 			}
 		}
@@ -126,6 +116,8 @@ func streamGame(gameId string, eng *uci.Engine) {
 
 func makeMove(gameId, move string) {
 	log.Println("REQUEST", "bot/game/"+gameId+"/move/"+move)
-	resp := request("POST", "bot/game/"+gameId+"/move/"+move)
-	log.Println(resp)
+	if move == "(none)" {
+		return
+	}
+	request("POST", "bot/game/"+gameId+"/move/"+move)
 }
