@@ -19,7 +19,7 @@ type gameState struct {
 	}
 	Speed      string
 	InitialFen string
-	State      struct {
+	State struct {
 		Type  string
 		Moves string
 		Wtime int
@@ -83,7 +83,7 @@ func streamGame(gameId string, eng *uci.Engine) {
 		}
 
 		if gS.Type == "gameFull" {
-			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, State: gS.State})
+			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, Moves: gS.Moves})
 
 			if gS.White.Id != conf.Botname {
 				white = false
