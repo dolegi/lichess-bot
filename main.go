@@ -17,8 +17,10 @@ type Config struct {
 	Engine  struct {
 		Path    string // done
 		Options struct {
+			Contempt int // done
 			Threads int // done
 			Hash    int // done
+			MoveOverhead int // done
 		}
 		Go struct {
 			Nodes    int // done
@@ -89,12 +91,14 @@ func main() {
 	if retries > 10 {
 		log.Fatal("Failed to find ready engine. Max retries exceeded", retries)
 	}
+	eng.SetOption("Contempt", conf.Engine.Options.Contempt)
 	if conf.Engine.Options.Threads > 0 {
 		eng.SetOption("Threads", conf.Engine.Options.Threads)
 	}
 	if conf.Engine.Options.Hash > 0 {
 		eng.SetOption("Hash", conf.Engine.Options.Hash)
 	}
+	eng.SetOption("Move Overhead", conf.Engine.Options.MoveOverhead)
 
 	streamEvent(eng)
 }
