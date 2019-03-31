@@ -43,6 +43,7 @@ type Config struct {
 
 var conf Config
 var white bool = true
+var whiteFirst bool = true
 
 func main() {
 	if len(os.Args) < 2 {

@@ -61,6 +61,10 @@ func streamGame(gameId string, eng *uci.Engine) {
 				gS.Btime -= conf.Network.Latency
 			}
 
+			if (gS.Moves == "" || (strings.Count(gS.Moves, " ") % 2 == 1)) != (white == whiteFirst) {
+				continue
+			}
+
 			opts := uci.GoOpts{
 				Wtime: gS.Wtime,
 				Btime: gS.Btime,
@@ -83,33 +87,33 @@ func streamGame(gameId string, eng *uci.Engine) {
 		}
 
 		if gS.Type == "gameFull" {
-			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, Moves: gS.Moves})
+			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, Moves: gS.State.Moves})
 
-			if gS.White.Id != conf.Botname {
-				white = false
-			} else {
-				white = true
-
-				opts := uci.GoOpts{
-					Wtime: gS.State.Wtime,
-					Btime: gS.State.Btime,
-					Winc:  gS.State.Winc,
-					Binc:  gS.State.Binc,
-				}
-				if conf.Engine.Go.Nodes > 0 {
-					opts.Nodes = conf.Engine.Go.Nodes
-				}
-				if conf.Engine.Go.Depth > 0 {
-					opts.Depth = conf.Engine.Go.Depth
-				}
-				if conf.Engine.Go.Movetime > 0 {
-					opts.MoveTime = conf.Engine.Go.Movetime
-				}
-
-				goResp := eng.Go(opts)
-
-				makeMove(gameId, goResp.Bestmove)
+			white = (gS.White.Id == conf.Botname)
+			whiteFirst = gS.InitialFen == "" || gS.InitialFen == "startpos" || strings.Contains(gS.InitialFen, "w")
+			if (gS.State.Moves == "" || (strings.Count(gS.State.Moves, " ") % 2 == 1)) != (white == whiteFirst) {
+				continue
 			}
+
+			opts := uci.GoOpts{
+				Wtime: gS.State.Wtime,
+				Btime: gS.State.Btime,
+				Winc:  gS.State.Winc,
+				Binc:  gS.State.Binc,
+			}
+			if conf.Engine.Go.Nodes > 0 {
+				opts.Nodes = conf.Engine.Go.Nodes
+			}
+			if conf.Engine.Go.Depth > 0 {
+				opts.Depth = conf.Engine.Go.Depth
+			}
+			if conf.Engine.Go.Movetime > 0 {
+				opts.MoveTime = conf.Engine.Go.Movetime
+			}
+
+			goResp := eng.Go(opts)
+
+			makeMove(gameId, goResp.Bestmove)
 		}
 	}
 }
