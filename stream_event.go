@@ -20,6 +20,24 @@ type game struct {
 type challenge struct {
 	Id      string `json:"id"`
 	Status  string `json:"status"`
+	Challenger struct {
+		Id      string `json:"id"`
+		Name    string `json:"name"`
+		Title	string `json:"title"`
+		Rating	int    `json:"rating"`
+		Provisional bool `json:"provisional"`
+		Online	bool   `json:"online"`
+		Lag	int    `json:"lag"`
+	}
+	DestUser struct {
+		Id      string `json:"id"`
+		Name    string `json:"name"`
+		Title	string `json:"title"`
+		Rating	int    `json:"rating"`
+		Provisional bool `json:"provisional"`
+		Online	bool   `json:"online"`
+		Lag	int    `json:"lag"`
+	}
 	Variant struct {
 		Key string `json:"key"`
 	}
@@ -62,6 +80,7 @@ func handleEvent(e *event, eng *uci.Engine) {
 
 func validChallenge(c *challenge) bool {
 	return c.Status == "created" &&
+		c.Challenger.Online == true &&
 		includes(conf.Challenge.Variants, c.Variant.Key) &&
 		includes(conf.Challenge.Speeds, c.Speed) &&
 		(c.Rated == true && includes(conf.Challenge.Modes, "rated") ||
