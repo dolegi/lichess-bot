@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/dolegi/uci"
 	"log"
+	"strings"
 )
 
 type gameState struct {
@@ -19,7 +20,7 @@ type gameState struct {
 	}
 	Speed      string
 	InitialFen string
-	State struct {
+	State      struct {
 		Type  string
 		Moves string
 		Wtime int
@@ -61,7 +62,7 @@ func streamGame(gameId string, eng *uci.Engine) {
 				gS.Btime -= conf.Network.Latency
 			}
 
-			if (gS.Moves == "" || (strings.Count(gS.Moves, " ") % 2 == 1)) != (white == whiteFirst) {
+			if (gS.Moves == "" || (strings.Count(gS.Moves, " ")%2 == 1)) != (white == whiteFirst) {
 				continue
 			}
 
@@ -91,7 +92,7 @@ func streamGame(gameId string, eng *uci.Engine) {
 
 			white = (gS.White.Id == conf.Botname)
 			whiteFirst = gS.InitialFen == "" || gS.InitialFen == "startpos" || strings.Contains(gS.InitialFen, "w")
-			if (gS.State.Moves == "" || (strings.Count(gS.State.Moves, " ") % 2 == 1)) != (white == whiteFirst) {
+			if (gS.State.Moves == "" || (strings.Count(gS.State.Moves, " ")%2 == 1)) != (white == whiteFirst) {
 				continue
 			}
 
