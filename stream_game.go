@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/dolegi/uci"
 	"log"
-	"strings"
 )
 
 type gameState struct {
@@ -20,7 +19,7 @@ type gameState struct {
 	}
 	Speed      string
 	InitialFen string
-	State      struct {
+	State struct {
 		Type  string
 		Moves string
 		Wtime int
@@ -41,8 +40,6 @@ type gameState struct {
 	Binc  int
 }
 
-var lastMove string
-
 func streamGame(gameId string, eng *uci.Engine) {
 	resp := request("GET", "bot/game/stream/"+gameId)
 	dec := json.NewDecoder(resp.Body)
@@ -56,19 +53,16 @@ func streamGame(gameId string, eng *uci.Engine) {
 		log.Printf("%v\n", gS)
 
 		if gS.Type == "gameState" {
-			moves := strings.Split(gS.Moves, " ")
-			log.Println("Latest move: ", moves[len(moves)-1])
-			log.Println("Last move: ", lastMove)
-			log.Println("Moves: ", gS.Moves)
-			if moves[len(moves)-1] == lastMove {
-				continue
-			}
 			eng.Position(gS.Moves)
 
 			if white {
 				gS.Wtime -= conf.Network.Latency
 			} else {
 				gS.Btime -= conf.Network.Latency
+			}
+
+			if (gS.Moves == "" || (strings.Count(gS.Moves, " ") % 2 == 1)) != (white == whiteFirst) {
+				continue
 			}
 
 			opts := uci.GoOpts{
@@ -90,45 +84,44 @@ func streamGame(gameId string, eng *uci.Engine) {
 			goResp := eng.Go(opts)
 
 			makeMove(gameId, goResp.Bestmove)
-			lastMove = goResp.Bestmove
 		}
 
 		if gS.Type == "gameFull" {
-			log.Println("Starting position: ", gS.InitialFen)
-			eng.NewGame(uci.NewGameOpts{StartPos: gS.InitialFen})
+			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, Moves: gS.State.Moves})
 
-			if gS.White.Id != conf.Botname {
-				white = false
-			} else {
-				white = true
-
-				opts := uci.GoOpts{
-					Wtime: gS.State.Wtime,
-					Btime: gS.State.Btime,
-					Winc:  gS.State.Winc,
-					Binc:  gS.State.Binc,
-				}
-				if conf.Engine.Go.Nodes > 0 {
-					opts.Nodes = conf.Engine.Go.Nodes
-				}
-				if conf.Engine.Go.Depth > 0 {
-					opts.Depth = conf.Engine.Go.Depth
-				}
-				if conf.Engine.Go.Movetime > 0 {
-					opts.MoveTime = conf.Engine.Go.Movetime
-				}
-
-				goResp := eng.Go(opts)
-
-				log.Println("Best move: ", goResp.Bestmove)
-				makeMove(gameId, goResp.Bestmove)
+			white = (gS.White.Id == conf.Botname)
+			whiteFirst = gS.InitialFen == "" || gS.InitialFen == "startpos" || strings.Contains(gS.InitialFen, "w")
+			if (gS.State.Moves == "" || (strings.Count(gS.State.Moves, " ") % 2 == 1)) != (white == whiteFirst) {
+				continue
 			}
+
+			opts := uci.GoOpts{
+				Wtime: gS.State.Wtime,
+				Btime: gS.State.Btime,
+				Winc:  gS.State.Winc,
+				Binc:  gS.State.Binc,
+			}
+			if conf.Engine.Go.Nodes > 0 {
+				opts.Nodes = conf.Engine.Go.Nodes
+			}
+			if conf.Engine.Go.Depth > 0 {
+				opts.Depth = conf.Engine.Go.Depth
+			}
+			if conf.Engine.Go.Movetime > 0 {
+				opts.MoveTime = conf.Engine.Go.Movetime
+			}
+
+			goResp := eng.Go(opts)
+
+			makeMove(gameId, goResp.Bestmove)
 		}
 	}
 }
 
 func makeMove(gameId, move string) {
 	log.Println("REQUEST", "bot/game/"+gameId+"/move/"+move)
-	resp := request("POST", "bot/game/"+gameId+"/move/"+move)
-	log.Println(resp)
+	if move == "(none)" {
+		return
+	}
+	request("POST", "bot/game/"+gameId+"/move/"+move)
 }
