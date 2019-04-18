@@ -17,9 +17,9 @@ type Config struct {
 	Engine  struct {
 		Path    string // done
 		Options struct {
-			Contempt int // done
-			Threads int // done
-			Hash    int // done
+			Contempt     int // done
+			Threads      int // done
+			Hash         int // done
 			MoveOverhead int // done
 		}
 		Go struct {
