@@ -70,7 +70,7 @@ func main() {
 			log.Println("Failed to upgrade account")
 			log.Println(string(body))
 		}
-
+		resp.Body.Close()
 		return
 	}
 

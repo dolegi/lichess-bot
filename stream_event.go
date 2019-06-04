@@ -116,9 +116,11 @@ func gameInProgress() bool {
 }
 
 func acceptChallenge(challengeId string) {
-	request("POST", "challenge/"+challengeId+"/accept")
+	resp := request("POST", "challenge/"+challengeId+"/accept")
+	resp.Body.Close()
 }
 
 func declineChallenge(challengeId string) {
-	request("POST", "challenge/"+challengeId+"/decline")
+	resp := request("POST", "challenge/"+challengeId+"/decline")
+	resp.Body.Close()
 }

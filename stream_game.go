@@ -124,5 +124,6 @@ func makeMove(gameId, move string) {
 	if move == "(none)" {
 		return
 	}
-	request("POST", "bot/game/"+gameId+"/move/"+move)
+	resp := request("POST", "bot/game/"+gameId+"/move/"+move)
+	resp.Body.Close()
 }
