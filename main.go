@@ -59,6 +59,7 @@ func main() {
 		log.Fatal("Failed to decode config.toml", err)
 	}
 	log.Println(conf)
+	log.Printf("%v\n", getUsersStatus(conf.Botname))
 
 	if len(os.Args) >= 3 && os.Args[2] == "upgrade" {
 		resp := request("POST", "bot/account/upgrade")
