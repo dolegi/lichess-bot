@@ -61,20 +61,32 @@ func streamEvent(eng *uci.Engine) {
 	}
 }
 
+var challengeId = ""
 func handleEvent(e *event, eng *uci.Engine) {
 	switch e.Type {
 	case "challenge":
-		if validChallenge(&e.Challenge) && !gameInProgress() {
-			log.Println("Accepting challenge", e.Challenge)
-			acceptChallenge(e.Challenge.Id)
+		if (e.Challenge.Id == challengeId) {
+			log.Println("Ignoring challenge", e.Challenge)
 		} else {
-			log.Println("Declining challenge", e.Challenge)
-			declineChallenge(e.Challenge.Id)
+			handleChallengeEvent(e)
 		}
 	case "gameStart":
 		streamGame(e.Game.Id, eng)
 	default:
 		log.Printf("Unhandled Event %v\n", e)
+	}
+}
+
+func handleChallengeEvent(e *event) {
+	challengeId = e.Challenge.Id
+	if validChallenge(&e.Challenge) && !gameInProgress() {
+		log.Println("Accepting challenge", e.Challenge)
+		resp := request("POST", "challenge/"+challengeId+"/accept")
+		resp.Body.Close()
+	} else {
+		log.Println("Declining challenge", e.Challenge)
+		resp := request("POST", "challenge/"+challengeId+"/decline")
+		resp.Body.Close()
 	}
 }
 
@@ -113,14 +125,4 @@ func gameInProgress() bool {
 	json.Unmarshal(body, &s)
 
 	return s[0].Playing
-}
-
-func acceptChallenge(challengeId string) {
-	resp := request("POST", "challenge/"+challengeId+"/accept")
-	resp.Body.Close()
-}
-
-func declineChallenge(challengeId string) {
-	resp := request("POST", "challenge/"+challengeId+"/decline")
-	resp.Body.Close()
 }
