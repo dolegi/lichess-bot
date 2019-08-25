@@ -61,15 +61,10 @@ func streamEvent(eng *uci.Engine) {
 	}
 }
 
-var challengeId = ""
 func handleEvent(e *event, eng *uci.Engine) {
 	switch e.Type {
 	case "challenge":
-		if (e.Challenge.Id == challengeId) {
-			log.Println("Ignoring challenge", e.Challenge)
-		} else {
-			handleChallengeEvent(e)
-		}
+		handleChallengeEvent(e)
 	case "gameStart":
 		streamGame(e.Game.Id, eng)
 	default:
@@ -78,7 +73,7 @@ func handleEvent(e *event, eng *uci.Engine) {
 }
 
 func handleChallengeEvent(e *event) {
-	challengeId = e.Challenge.Id
+	challengeId := e.Challenge.Id
 	if validChallenge(&e.Challenge) && !gameInProgress() {
 		log.Println("Accepting challenge", e.Challenge)
 		resp := request("POST", "challenge/"+challengeId+"/accept")
