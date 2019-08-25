@@ -89,6 +89,8 @@ func streamGame(gameId string, eng *uci.Engine) {
 
 		if gS.Type == "gameFull" {
 			eng.NewGame(uci.NewGameOpts{Variant: gS.Variant, InitialFen: gS.InitialFen, Moves: gS.State.Moves})
+			chat(gameId, "player", eng.Meta.Name)
+			chat(gameId, "spectator", eng.Meta.Name)
 
 			white = (gS.White.Id == conf.Botname)
 			whiteFirst = gS.InitialFen == "" || gS.InitialFen == "startpos" || strings.Contains(gS.InitialFen, "w")
