@@ -2,3 +2,5 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/dolegi/uci v0.0.0-20190418200449-4e3e3cc6c783 h1:E89simZ68PkZlR0SHk1vzIEyYXnpEtPx5qv14FfOI7U=
 github.com/dolegi/uci v0.0.0-20190418200449-4e3e3cc6c783/go.mod h1:35AVjTnWwAHg4O1kIfmwNV/17rvysNCR4fpIP/JB6XE=
+github.com/dolegi/uci v0.0.0-20191026230034-d695ec02113b h1:8Tr7KMoVuPXfbi6FNXCI+yj+c/q1sce3oa/AzPkgHXw=
+github.com/dolegi/uci v0.0.0-20191026230034-d695ec02113b/go.mod h1:35AVjTnWwAHg4O1kIfmwNV/17rvysNCR4fpIP/JB6XE=
