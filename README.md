@@ -74,6 +74,10 @@ modes = [ # Modes to play. Must be "rated" and/or "casual"
 ]
 ```
 
+# Docker
+Example usage for using Docker:
+`docker build . -t lichess-bot  && docker run -v $(pwd)/config.toml:/app/config.toml lichess-bot ./config.toml`
+
 # Releases 
 To install run `go get github/dolegi/lichess-bot`
 Note: Windows release is untested
