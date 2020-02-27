@@ -22,8 +22,7 @@ func chat(gameId, room, text string) *http.Response {
 		return nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Response %d %s", resp.StatusCode, method+" "+path)
-		log.Printf("Response: %q", resp)
+		log.Printf("Response %d %s %s %s", resp.StatusCode, http.StatusText(resp.StatusCode), method, path)
 	}
 	return resp
 }
@@ -37,8 +36,7 @@ func request(method, path string) *http.Response {
 		return nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Response %d %s", resp.StatusCode, method+" "+path)
-		log.Printf("Response: %q", resp)
+		log.Printf("Response %d %s %s %s", resp.StatusCode, http.StatusText(resp.StatusCode), method, path)
 	}
 	return resp
 }
