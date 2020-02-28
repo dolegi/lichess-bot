@@ -1,15 +1,15 @@
-# Lichess Bot 
-Lichess bot interface for uci compatible engines.
+# Lichess Bot ![Go](https://github.com/dolegi/lichess-bot/workflows/Go/badge.svg)
+Lichess BOT interface for UCI compatible engines.
 
 ## How to use
-- Upgrade to a bot account on lichess. [guide](https://lichess.org/api#operation/botAccountUpgrade)
+- Upgrade to a BOT account on lichess. [guide](https://lichess.org/api#operation/botAccountUpgrade)
 - `go get github.com/dolegi/lichess-bot` 
-- Download a uci compatible engine such as [stockfish](https://stockfishchess.org/download/)
+- Download a UCI compatible engine such as [stockfish](https://stockfishchess.org/download/)
 - Create a new toml file for config
-- Put bot name, api key and engine path in `config.toml`
+- Put BOT name, API key and engine path in `config.toml`
 - Run with `./lichess-bot config.toml`
 
-### Upgrade to bot account
+### Upgrade to BOT account
 As well as normal usage shown above, you can use this library to upgrade your account
 
 > WARNING: Upgrading your account cannot be undone
@@ -44,12 +44,12 @@ modes = [
 
 # Config format
 ```toml
-token = "XXX" # API token for lichess
-botname = "XXX" # Name of the bot account
-url = "https://lichess.org/api/" # Url for lichess api
+token = "XXX" # API token for Lichess
+botname = "XXX" # Name of the BOT account
+url = "https://lichess.org/api/" # URL for Lichess API
 
 [engine]
-path = "path/to/engine" # Path to uci compatible engine
+path = "path/to/engine" # Path to UCI compatible engine
   [engine.options]
   threads = 1 # Number of CPU threads to use
   hash = 512 # Max memory in MB engine can use
@@ -83,6 +83,6 @@ To install run `go get github/dolegi/lichess-bot`
 Note: Windows release is untested
 
 # References
-- [Lichess docs](https://lichess.org/api#tag/Chess-Bot)
-- [python lichess bot](https://github.com/careless25/lichess-bot)
-- [uci reference](https://www.shredderchess.com/chess-info/features/uci-universal-chess-interface.html)
+- [Lichess BOT API](https://lichess.org/api#tag/Chess-Bot)
+- [Python Lichess BOT](https://github.com/careless25/lichess-bot)
+- [UCI reference](https://www.shredderchess.com/chess-info/features/uci-universal-chess-interface.html)
