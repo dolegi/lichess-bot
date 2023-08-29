@@ -83,6 +83,7 @@ To install run `go get github/dolegi/lichess-bot`
 Note: Windows release is untested
 
 # References
-- [Lichess BOT API](https://lichess.org/api#tag/Chess-Bot)
-- [Python Lichess BOT](https://github.com/careless25/lichess-bot)
+- [Lichess BOT API](https://lichess.org/api#tag/Bot)
+- [Python Lichess BOT Offical](https://github.com/lichess-bot-devs/lichess-bot)
+- [Python Lichess BOT](https://github.com/lichess-bot-devs/lichess-bot)
 - [UCI reference](https://www.shredderchess.com/chess-info/features/uci-universal-chess-interface.html)
